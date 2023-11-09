@@ -1,0 +1,41 @@
+import { getStorage,ref,uploadBytes,uploadBytesResumable,getDownloadURL } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
+
+
+function uploadFile(file){
+
+    return new Promise((resolve,reject)=>{
+    // Storing file in Storage with name here file is let file=document.getElementById("fileinput").files[0];
+    // so we just have to give file in function 
+    
+    const mountainImagesRef = ref(storage, `images/${file.name}`);
+    
+    // Storing in data base with url return
+    
+    const uploadTask = uploadBytesResumable(mountainImagesRef, file);
+    uploadTask.on('state_changed', 
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+        switch (snapshot.state) {
+          case 'paused':
+            console.log('Upload is paused');
+            break;
+          case 'running':
+            console.log('Upload is running');
+            break;
+        }
+      }, 
+      (error) => {
+        reject(error);
+      }, 
+      
+      () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            // It will return URL Function which is using it must store its response
+          resolve( downloadURL);
+        });
+         }
+    );
+    
+    })
+    }
